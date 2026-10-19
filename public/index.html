@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Door Status</title>
+  <style>
+    body { margin:0; height:100vh; display:flex; flex-direction:column;
+           align-items:center; justify-content:center; gap:32px;
+           background:#111; color:#fff; font-family:system-ui,sans-serif; transition:background .4s; }
+    .light { width:140px; height:140px; border-radius:50%; background:#333; transition:all .4s; }
+    h1 { font-size:3rem; margin:0; text-transform:uppercase; letter-spacing:.2em; }
+    small { color:#888; }
+  </style>
+</head>
+<body>
+  <div class="light" id="light"></div>
+  <h1 id="label">...</h1>
+  <small id="updated"></small>
+
+  <script>
+    const colors = { open:"#22c55e", away:"#f59e0b", close:"#ef4444" };
+
+    async function refresh() {
+      try {
+        const r = await fetch("/api/status");
+        const d = await r.json();
+        document.getElementById("light").style.background = colors[d.state] || "#333";
+        document.getElementById("light").style.boxShadow = `0 0 60px ${colors[d.state]}`;
+        document.getElementById("label").textContent = d.state.toUpperCase();
+        document.getElementById("updated").textContent =
+          "updated " + new Date(d.updated_at).toLocaleTimeString();
+      } catch (e) { /* offline, keep last state */ }
+    }
+    refresh();
+    setInterval(refresh, 2000);
+  </script>
+</body>
+</html>
